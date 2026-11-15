@@ -18,6 +18,7 @@ import com.cinema.modules.staff.dto.response.ShowtimeOverviewResponse;
 import com.cinema.modules.staff.dto.response.StaffOverviewResponse;
 import com.cinema.modules.staff.service.interfaces.IStaffOverviewService;
 import com.cinema.modules.staff.service.interfaces.IStaffShiftService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class StaffOverviewService implements IStaffOverviewService {
 
     private final IBranchAccessService branchAccessService;
@@ -41,27 +43,6 @@ public class StaffOverviewService implements IStaffOverviewService {
     private final ITicketCheckInQueueService ticketCheckInQueueService;
     private final IStaffShiftService staffShiftService;
     private final Clock clock;
-
-    public StaffOverviewService(
-            IBranchAccessService branchAccessService,
-            IShowtimeQueryService showtimeQueryService,
-            IMovieQueryService movieQueryService,
-            ICinemaQueryService cinemaQueryService,
-            IShowtimeTicketStatsService showtimeTicketStatsService,
-            IFnbPickupService fnbPickupService,
-            ITicketCheckInQueueService ticketCheckInQueueService,
-            IStaffShiftService staffShiftService,
-            Clock clock) {
-        this.branchAccessService = branchAccessService;
-        this.showtimeQueryService = showtimeQueryService;
-        this.movieQueryService = movieQueryService;
-        this.cinemaQueryService = cinemaQueryService;
-        this.showtimeTicketStatsService = showtimeTicketStatsService;
-        this.fnbPickupService = fnbPickupService;
-        this.ticketCheckInQueueService = ticketCheckInQueueService;
-        this.staffShiftService = staffShiftService;
-        this.clock = clock;
-    }
 
     @Transactional(readOnly = true)
     @Override

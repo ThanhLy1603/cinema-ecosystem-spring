@@ -4,6 +4,7 @@ import com.cinema.modules.auth.service.interfaces.IUserLoyaltyService;
 import com.cinema.modules.promotion.entity.LoyaltyPointTransaction;
 import com.cinema.modules.promotion.repository.LoyaltyPointTransactionRepository;
 import com.cinema.modules.promotion.service.interfaces.ILoyaltyService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,7 @@ import java.time.Clock;
 import java.time.Instant;
 
 @Service
+@RequiredArgsConstructor
 public class LoyaltyService implements ILoyaltyService {
 
     static final String EARN_TYPE = "EARN";
@@ -23,15 +25,6 @@ public class LoyaltyService implements ILoyaltyService {
     private final LoyaltyPointTransactionRepository loyaltyPointTransactionRepository;
     private final IUserLoyaltyService userLoyaltyService;
     private final Clock clock;
-
-    public LoyaltyService(
-            LoyaltyPointTransactionRepository loyaltyPointTransactionRepository,
-            IUserLoyaltyService userLoyaltyService,
-            Clock clock) {
-        this.loyaltyPointTransactionRepository = loyaltyPointTransactionRepository;
-        this.userLoyaltyService = userLoyaltyService;
-        this.clock = clock;
-    }
 
     @Transactional
     @Override

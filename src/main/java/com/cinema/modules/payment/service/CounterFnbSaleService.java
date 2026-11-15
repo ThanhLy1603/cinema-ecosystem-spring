@@ -19,6 +19,7 @@ import com.cinema.modules.payment.enums.PaymentMethod;
 import com.cinema.modules.payment.repository.CounterFnbOrderLineRepository;
 import com.cinema.modules.payment.repository.CounterFnbOrderRepository;
 import com.cinema.modules.payment.service.interfaces.ICounterFnbSaleService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class CounterFnbSaleService implements ICounterFnbSaleService {
 
     static final String ORDER_CODE_PREFIX = "FB";
@@ -49,25 +51,6 @@ public class CounterFnbSaleService implements ICounterFnbSaleService {
     private final ICinemaQueryService cinemaQueryService;
     private final IAuditLogService auditLogService;
     private final Clock clock;
-
-    public CounterFnbSaleService(
-            CounterFnbOrderRepository counterFnbOrderRepository,
-            CounterFnbOrderLineRepository counterFnbOrderLineRepository,
-            IFnbQueryService fnbQueryService,
-            IBranchAccessService branchAccessService,
-            IUserQueryService userQueryService,
-            ICinemaQueryService cinemaQueryService,
-            IAuditLogService auditLogService,
-            Clock clock) {
-        this.counterFnbOrderRepository = counterFnbOrderRepository;
-        this.counterFnbOrderLineRepository = counterFnbOrderLineRepository;
-        this.fnbQueryService = fnbQueryService;
-        this.branchAccessService = branchAccessService;
-        this.userQueryService = userQueryService;
-        this.cinemaQueryService = cinemaQueryService;
-        this.auditLogService = auditLogService;
-        this.clock = clock;
-    }
 
     @Transactional
     @Override

@@ -5,6 +5,7 @@ import com.cinema.modules.showtime.entity.Showtime;
 import com.cinema.modules.showtime.enums.ShowtimeStatus;
 import com.cinema.modules.showtime.repository.ShowtimeRepository;
 import com.cinema.modules.showtime.service.interfaces.IShowtimeQueryService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -12,13 +13,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ShowtimeQueryService implements IShowtimeQueryService {
 
     private final ShowtimeRepository showtimeRepository;
-
-    public ShowtimeQueryService(ShowtimeRepository showtimeRepository) {
-        this.showtimeRepository = showtimeRepository;
-    }
 
     @Override
     public Optional<ShowtimeInfoResponse> findShowtimeInfo(Long showtimeId) {

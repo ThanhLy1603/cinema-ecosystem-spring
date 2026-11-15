@@ -4,19 +4,17 @@ import com.cinema.modules.payment.dto.response.RefundedPaymentResponse;
 import com.cinema.modules.payment.enums.PaymentStatus;
 import com.cinema.modules.payment.repository.PaymentRepository;
 import com.cinema.modules.payment.service.interfaces.IPaymentRefundService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class PaymentRefundService implements IPaymentRefundService {
 
     private final PaymentRepository paymentRepository;
-
-    public PaymentRefundService(PaymentRepository paymentRepository) {
-        this.paymentRepository = paymentRepository;
-    }
 
     @Transactional
     @Override

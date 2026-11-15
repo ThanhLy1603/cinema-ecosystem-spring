@@ -12,6 +12,7 @@ import com.cinema.modules.staff.dto.response.ShiftResponse;
 import com.cinema.modules.staff.dto.response.StaffRevenueResponse;
 import com.cinema.modules.staff.service.interfaces.IStaffRevenueService;
 import com.cinema.modules.staff.service.interfaces.IStaffShiftService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ import java.time.Instant;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class StaffRevenueService implements IStaffRevenueService {
 
     private static final int MAX_SHIFTS_IN_REPORT = 100;
@@ -28,17 +30,6 @@ public class StaffRevenueService implements IStaffRevenueService {
     private final IStaffShiftService staffShiftService;
     private final CinemaScopeResolver cinemaScopeResolver;
     private final IUserQueryService userQueryService;
-
-    public StaffRevenueService(
-            IRevenueReportService revenueReportService,
-            IStaffShiftService staffShiftService,
-            CinemaScopeResolver cinemaScopeResolver,
-            IUserQueryService userQueryService) {
-        this.revenueReportService = revenueReportService;
-        this.staffShiftService = staffShiftService;
-        this.cinemaScopeResolver = cinemaScopeResolver;
-        this.userQueryService = userQueryService;
-    }
 
     @Transactional(readOnly = true)
     @Override

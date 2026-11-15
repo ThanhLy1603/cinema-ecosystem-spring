@@ -10,6 +10,7 @@ import com.cinema.modules.payment.dto.response.CounterReceiptResponse;
 import com.cinema.modules.payment.service.interfaces.ICounterPaymentService;
 import com.cinema.modules.payment.service.interfaces.ICounterReceiptFileService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,21 +22,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/staff/ticket-sales")
 public class StaffTicketSalesController {
 
     private final ICounterPaymentService counterPaymentService;
     private final ICounterReceiptFileService counterReceiptFileService;
     private final IUserQueryService userQueryService;
-
-    public StaffTicketSalesController(
-            ICounterPaymentService counterPaymentService,
-            ICounterReceiptFileService counterReceiptFileService,
-            IUserQueryService userQueryService) {
-        this.counterPaymentService = counterPaymentService;
-        this.counterReceiptFileService = counterReceiptFileService;
-        this.userQueryService = userQueryService;
-    }
 
     @PostMapping("/checkout")
     public ResponseEntity<ApiResponse<CounterReceiptResponse>> checkout(

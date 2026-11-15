@@ -14,6 +14,7 @@ import com.cinema.modules.booking.service.interfaces.IBookingFnbService;
 import com.cinema.modules.booking.service.interfaces.ISeatHoldService;
 import com.cinema.modules.fnb.dto.response.FnbProductInfoResponse;
 import com.cinema.modules.fnb.service.interfaces.IFnbQueryService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -28,6 +29,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class BookingFnbService implements IBookingFnbService {
 
     private final BookingRepository bookingRepository;
@@ -37,23 +39,6 @@ public class BookingFnbService implements IBookingFnbService {
     private final SeatGapChecker seatGapChecker;
     private final TransactionTemplate transactionTemplate;
     private final Clock clock;
-
-    public BookingFnbService(
-            BookingRepository bookingRepository,
-            BookingFnbDetailRepository bookingFnbDetailRepository,
-            IFnbQueryService fnbQueryService,
-            ISeatHoldService seatHoldService,
-            SeatGapChecker seatGapChecker,
-            TransactionTemplate transactionTemplate,
-            Clock clock) {
-        this.bookingRepository = bookingRepository;
-        this.bookingFnbDetailRepository = bookingFnbDetailRepository;
-        this.fnbQueryService = fnbQueryService;
-        this.seatHoldService = seatHoldService;
-        this.seatGapChecker = seatGapChecker;
-        this.transactionTemplate = transactionTemplate;
-        this.clock = clock;
-    }
 
     @Override
     public BookingFnbResponse getPendingFnb(Long userId) {

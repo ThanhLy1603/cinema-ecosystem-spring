@@ -7,6 +7,7 @@ import com.cinema.modules.payment.dto.response.RevenueStaffResponse;
 import com.cinema.modules.payment.dto.response.RevenueSummaryResponse;
 import com.cinema.modules.payment.enums.PaymentMethod;
 import com.cinema.modules.payment.service.interfaces.IRevenueReportService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -21,15 +22,12 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class RevenueReportService implements IRevenueReportService {
 
     private static final int MAX_TRANSACTIONS = 300;
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-
-    public RevenueReportService(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
-        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
-    }
 
     @Transactional(readOnly = true)
     @Override

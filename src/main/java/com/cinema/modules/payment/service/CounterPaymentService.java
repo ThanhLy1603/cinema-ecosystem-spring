@@ -19,6 +19,7 @@ import com.cinema.modules.payment.enums.PaymentMethod;
 import com.cinema.modules.payment.enums.PaymentStatus;
 import com.cinema.modules.payment.repository.PaymentRepository;
 import com.cinema.modules.payment.service.interfaces.ICounterPaymentService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class CounterPaymentService implements ICounterPaymentService {
 
     static final String TRANSACTION_REF_SUFFIX = "-POS";
@@ -46,25 +48,6 @@ public class CounterPaymentService implements ICounterPaymentService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final IAuditLogService auditLogService;
     private final Clock clock;
-
-    public CounterPaymentService(
-            PaymentRepository paymentRepository,
-            IBookingSettlementService bookingSettlementService,
-            IBookingDetailService bookingDetailService,
-            IBranchAccessService branchAccessService,
-            IUserQueryService userQueryService,
-            ApplicationEventPublisher applicationEventPublisher,
-            IAuditLogService auditLogService,
-            Clock clock) {
-        this.paymentRepository = paymentRepository;
-        this.bookingSettlementService = bookingSettlementService;
-        this.bookingDetailService = bookingDetailService;
-        this.branchAccessService = branchAccessService;
-        this.userQueryService = userQueryService;
-        this.applicationEventPublisher = applicationEventPublisher;
-        this.auditLogService = auditLogService;
-        this.clock = clock;
-    }
 
     @Transactional
     @Override

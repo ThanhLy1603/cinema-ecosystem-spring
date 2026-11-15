@@ -10,6 +10,7 @@ import com.cinema.modules.staff.dto.response.StaffOverviewResponse;
 import com.cinema.modules.staff.service.interfaces.IStaffOverviewService;
 import com.cinema.modules.staff.service.interfaces.IStaffShiftService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/staff")
 public class StaffShiftController {
 
@@ -30,11 +32,6 @@ public class StaffShiftController {
 
     private final IStaffShiftService staffShiftService;
     private final IStaffOverviewService staffOverviewService;
-
-    public StaffShiftController(IStaffShiftService staffShiftService, IStaffOverviewService staffOverviewService) {
-        this.staffShiftService = staffShiftService;
-        this.staffOverviewService = staffOverviewService;
-    }
 
     @GetMapping("/overview")
     public ResponseEntity<ApiResponse<StaffOverviewResponse>> findOverview(

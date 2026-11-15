@@ -14,6 +14,7 @@ import com.cinema.modules.booking.service.interfaces.IBookingDetailService;
 import com.cinema.modules.booking.service.interfaces.ITicketMailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.MailException;
@@ -36,6 +37,7 @@ import java.util.Optional;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class TicketMailService implements ITicketMailService {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER =
@@ -48,19 +50,6 @@ public class TicketMailService implements ITicketMailService {
     private final IBookingDetailService bookingDetailService;
     private final IUserQueryService userQueryService;
     private final QrCodeGenerator qrCodeGenerator;
-
-    public TicketMailService(
-            JavaMailSender javaMailSender,
-            AppMailProperties appMailProperties,
-            IBookingDetailService bookingDetailService,
-            IUserQueryService userQueryService,
-            QrCodeGenerator qrCodeGenerator) {
-        this.javaMailSender = javaMailSender;
-        this.appMailProperties = appMailProperties;
-        this.bookingDetailService = bookingDetailService;
-        this.userQueryService = userQueryService;
-        this.qrCodeGenerator = qrCodeGenerator;
-    }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)

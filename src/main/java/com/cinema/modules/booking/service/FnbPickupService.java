@@ -35,6 +35,7 @@ import com.cinema.modules.movie.dto.response.MovieInfoResponse;
 import com.cinema.modules.movie.service.interfaces.IMovieQueryService;
 import com.cinema.modules.showtime.dto.response.ShowtimeInfoResponse;
 import com.cinema.modules.showtime.service.interfaces.IShowtimeQueryService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -57,6 +58,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class FnbPickupService implements IFnbPickupService {
 
     private static final String SCAN_CHANNEL = "FNB_PICKUP";
@@ -78,33 +80,6 @@ public class FnbPickupService implements IFnbPickupService {
     private final ICinemaQueryService cinemaQueryService;
     private final ScanGuard scanGuard;
     private final Clock clock;
-
-    public FnbPickupService(
-            BookingRepository bookingRepository,
-            BookingFnbDetailRepository bookingFnbDetailRepository,
-            FnbDeliveryLogRepository fnbDeliveryLogRepository,
-            IBookingDetailService bookingDetailService,
-            IBranchAccessService branchAccessService,
-            IUserQueryService userQueryService,
-            IFnbQueryService fnbQueryService,
-            IShowtimeQueryService showtimeQueryService,
-            IMovieQueryService movieQueryService,
-            ICinemaQueryService cinemaQueryService,
-            ScanGuard scanGuard,
-            Clock clock) {
-        this.bookingRepository = bookingRepository;
-        this.bookingFnbDetailRepository = bookingFnbDetailRepository;
-        this.fnbDeliveryLogRepository = fnbDeliveryLogRepository;
-        this.bookingDetailService = bookingDetailService;
-        this.branchAccessService = branchAccessService;
-        this.userQueryService = userQueryService;
-        this.fnbQueryService = fnbQueryService;
-        this.showtimeQueryService = showtimeQueryService;
-        this.movieQueryService = movieQueryService;
-        this.cinemaQueryService = cinemaQueryService;
-        this.scanGuard = scanGuard;
-        this.clock = clock;
-    }
 
     @Transactional(readOnly = true)
     @Override

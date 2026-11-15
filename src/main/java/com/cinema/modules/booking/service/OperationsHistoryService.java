@@ -19,6 +19,7 @@ import com.cinema.modules.cinema.service.interfaces.ICinemaQueryService;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -36,6 +37,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class OperationsHistoryService implements IOperationsHistoryService {
 
     private static final int MAX_PAGE_SIZE = 100;
@@ -46,21 +48,6 @@ public class OperationsHistoryService implements IOperationsHistoryService {
     private final CinemaScopeResolver cinemaScopeResolver;
     private final IUserQueryService userQueryService;
     private final ICinemaQueryService cinemaQueryService;
-
-    public OperationsHistoryService(
-            TicketScanLogRepository ticketScanLogRepository,
-            FnbDeliveryLogRepository fnbDeliveryLogRepository,
-            BookingRepository bookingRepository,
-            CinemaScopeResolver cinemaScopeResolver,
-            IUserQueryService userQueryService,
-            ICinemaQueryService cinemaQueryService) {
-        this.ticketScanLogRepository = ticketScanLogRepository;
-        this.fnbDeliveryLogRepository = fnbDeliveryLogRepository;
-        this.bookingRepository = bookingRepository;
-        this.cinemaScopeResolver = cinemaScopeResolver;
-        this.userQueryService = userQueryService;
-        this.cinemaQueryService = cinemaQueryService;
-    }
 
     @Transactional(readOnly = true)
     @Override

@@ -12,6 +12,7 @@ import com.cinema.modules.payment.entity.Payment;
 import com.cinema.modules.payment.repository.PaymentRepository;
 import com.cinema.modules.payment.service.interfaces.ICounterFnbSaleService;
 import com.cinema.modules.payment.service.interfaces.ICounterReceiptFileService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ import java.nio.file.Path;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class CounterReceiptFileService implements ICounterReceiptFileService {
 
     static final String RECEIPT_FILE_EXTENSION = ".pdf";
@@ -33,21 +35,6 @@ public class CounterReceiptFileService implements ICounterReceiptFileService {
     private final CounterReceiptPdfRenderer counterReceiptPdfRenderer;
     private final ICounterFnbSaleService counterFnbSaleService;
     private final ReceiptProperties receiptProperties;
-
-    public CounterReceiptFileService(
-            IBookingDetailService bookingDetailService,
-            IBranchAccessService branchAccessService,
-            PaymentRepository paymentRepository,
-            CounterReceiptPdfRenderer counterReceiptPdfRenderer,
-            ICounterFnbSaleService counterFnbSaleService,
-            ReceiptProperties receiptProperties) {
-        this.bookingDetailService = bookingDetailService;
-        this.branchAccessService = branchAccessService;
-        this.paymentRepository = paymentRepository;
-        this.counterReceiptPdfRenderer = counterReceiptPdfRenderer;
-        this.counterFnbSaleService = counterFnbSaleService;
-        this.receiptProperties = receiptProperties;
-    }
 
     @Transactional(readOnly = true)
     @Override

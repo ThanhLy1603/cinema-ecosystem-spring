@@ -18,6 +18,7 @@ import com.cinema.modules.booking.repository.SeatReservationRepository;
 import com.cinema.modules.booking.repository.TicketRepository;
 import com.cinema.modules.booking.service.interfaces.IBookingSettlementService;
 import com.cinema.modules.booking.service.interfaces.ISeatStatusBroadcaster;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,7 @@ import java.util.Optional;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class BookingSettlementService implements IBookingSettlementService {
 
     private final BookingRepository bookingRepository;
@@ -47,27 +49,6 @@ public class BookingSettlementService implements IBookingSettlementService {
     private final ISeatStatusBroadcaster seatStatusBroadcaster;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final Clock clock;
-
-    public BookingSettlementService(
-            BookingRepository bookingRepository,
-            SeatReservationRepository seatReservationRepository,
-            TicketRepository ticketRepository,
-            BookingFnbDetailRepository bookingFnbDetailRepository,
-            SeatGapChecker seatGapChecker,
-            TicketCodeGenerator ticketCodeGenerator,
-            ISeatStatusBroadcaster seatStatusBroadcaster,
-            ApplicationEventPublisher applicationEventPublisher,
-            Clock clock) {
-        this.bookingRepository = bookingRepository;
-        this.seatReservationRepository = seatReservationRepository;
-        this.ticketRepository = ticketRepository;
-        this.bookingFnbDetailRepository = bookingFnbDetailRepository;
-        this.seatGapChecker = seatGapChecker;
-        this.ticketCodeGenerator = ticketCodeGenerator;
-        this.seatStatusBroadcaster = seatStatusBroadcaster;
-        this.applicationEventPublisher = applicationEventPublisher;
-        this.clock = clock;
-    }
 
     @Transactional
     @Override

@@ -8,6 +8,7 @@ import com.cinema.modules.payment.dto.response.CounterReceiptFileResponse;
 import com.cinema.modules.payment.service.interfaces.ICounterFnbSaleService;
 import com.cinema.modules.payment.service.interfaces.ICounterReceiptFileService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,17 +18,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/staff/fnb-sales")
 public class StaffFnbSalesController {
 
     private final ICounterFnbSaleService counterFnbSaleService;
     private final ICounterReceiptFileService counterReceiptFileService;
-
-    public StaffFnbSalesController(
-            ICounterFnbSaleService counterFnbSaleService, ICounterReceiptFileService counterReceiptFileService) {
-        this.counterFnbSaleService = counterFnbSaleService;
-        this.counterReceiptFileService = counterReceiptFileService;
-    }
 
     @PostMapping("/checkout")
     public ResponseEntity<ApiResponse<CounterFnbReceiptResponse>> checkout(

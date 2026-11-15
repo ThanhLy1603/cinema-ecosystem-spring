@@ -23,6 +23,7 @@ import com.cinema.modules.staff.enums.ShiftStatus;
 import com.cinema.modules.staff.repository.StaffShiftRepository;
 import com.cinema.modules.staff.service.interfaces.IStaffShiftService;
 import jakarta.persistence.criteria.Predicate;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class StaffShiftService implements IStaffShiftService {
 
     private static final int MAX_PAGE_SIZE = 100;
@@ -51,25 +53,6 @@ public class StaffShiftService implements IStaffShiftService {
     private final ICinemaQueryService cinemaQueryService;
     private final IAuditLogService auditLogService;
     private final Clock clock;
-
-    public StaffShiftService(
-            StaffShiftRepository staffShiftRepository,
-            IRevenueReportService revenueReportService,
-            IBranchAccessService branchAccessService,
-            CinemaScopeResolver cinemaScopeResolver,
-            IUserQueryService userQueryService,
-            ICinemaQueryService cinemaQueryService,
-            IAuditLogService auditLogService,
-            Clock clock) {
-        this.staffShiftRepository = staffShiftRepository;
-        this.revenueReportService = revenueReportService;
-        this.branchAccessService = branchAccessService;
-        this.cinemaScopeResolver = cinemaScopeResolver;
-        this.userQueryService = userQueryService;
-        this.cinemaQueryService = cinemaQueryService;
-        this.auditLogService = auditLogService;
-        this.clock = clock;
-    }
 
     @Transactional
     @Override

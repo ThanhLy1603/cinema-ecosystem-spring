@@ -4,12 +4,14 @@ import com.cinema.common.exception.AppException;
 import com.cinema.common.ratelimit.RateLimiter;
 import com.cinema.modules.audit.enums.AuditAction;
 import com.cinema.modules.audit.service.interfaces.IAuditLogService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 
 @Component
+@RequiredArgsConstructor
 public class ScanGuard {
 
     static final int MAX_SCANS_PER_WINDOW = 60;
@@ -18,11 +20,6 @@ public class ScanGuard {
 
     private final RateLimiter rateLimiter;
     private final IAuditLogService auditLogService;
-
-    public ScanGuard(RateLimiter rateLimiter, IAuditLogService auditLogService) {
-        this.rateLimiter = rateLimiter;
-        this.auditLogService = auditLogService;
-    }
 
     public void assertScanAllowed(Long staffUserId, Long cinemaId, String channel) {
         if (!rateLimiter.tryAcquire("scan:" + channel + ":" + staffUserId, MAX_SCANS_PER_WINDOW, WINDOW)) {

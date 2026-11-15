@@ -12,6 +12,7 @@ import com.cinema.modules.auth.scope.CinemaScopeResolver;
 import com.cinema.modules.auth.service.interfaces.IUserQueryService;
 import com.cinema.modules.cinema.service.interfaces.ICinemaQueryService;
 import jakarta.persistence.criteria.Predicate;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @Service
+@RequiredArgsConstructor
 public class AuditLogService implements IAuditLogService {
 
     private static final int MAX_PAGE_SIZE = 100;
@@ -39,19 +41,6 @@ public class AuditLogService implements IAuditLogService {
     private final IUserQueryService userQueryService;
     private final ICinemaQueryService cinemaQueryService;
     private final Clock clock;
-
-    public AuditLogService(
-            AuditLogRepository auditLogRepository,
-            CinemaScopeResolver cinemaScopeResolver,
-            IUserQueryService userQueryService,
-            ICinemaQueryService cinemaQueryService,
-            Clock clock) {
-        this.auditLogRepository = auditLogRepository;
-        this.cinemaScopeResolver = cinemaScopeResolver;
-        this.userQueryService = userQueryService;
-        this.cinemaQueryService = cinemaQueryService;
-        this.clock = clock;
-    }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override

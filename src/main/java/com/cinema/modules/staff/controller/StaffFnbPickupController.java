@@ -9,6 +9,7 @@ import com.cinema.modules.booking.dto.response.FnbPickupQueueResponse;
 import com.cinema.modules.booking.dto.response.FnbPickupScanResponse;
 import com.cinema.modules.booking.service.interfaces.IFnbPickupService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,14 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/staff/fnb-pickup")
 public class StaffFnbPickupController {
 
     private final IFnbPickupService fnbPickupService;
-
-    public StaffFnbPickupController(IFnbPickupService fnbPickupService) {
-        this.fnbPickupService = fnbPickupService;
-    }
 
     @PostMapping("/scan")
     public ResponseEntity<ApiResponse<FnbPickupScanResponse>> scan(

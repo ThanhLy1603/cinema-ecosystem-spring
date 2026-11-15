@@ -6,6 +6,7 @@ import com.cinema.modules.auth.entity.User;
 import com.cinema.modules.auth.enums.UserStatus;
 import com.cinema.modules.auth.repository.UserRepository;
 import com.cinema.modules.auth.service.interfaces.IUserQueryService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,13 +14,10 @@ import java.util.Locale;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserQueryService implements IUserQueryService {
 
     private final UserRepository userRepository;
-
-    public UserQueryService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     @Transactional(readOnly = true)
     @Override

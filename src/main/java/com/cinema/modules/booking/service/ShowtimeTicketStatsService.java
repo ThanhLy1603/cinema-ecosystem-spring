@@ -5,6 +5,7 @@ import com.cinema.modules.booking.enums.SeatReservationStatus;
 import com.cinema.modules.booking.repository.SeatReservationRepository;
 import com.cinema.modules.booking.repository.TicketRepository;
 import com.cinema.modules.booking.service.interfaces.IShowtimeTicketStatsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,18 +16,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class ShowtimeTicketStatsService implements IShowtimeTicketStatsService {
 
     private final TicketRepository ticketRepository;
     private final SeatReservationRepository seatReservationRepository;
     private final Clock clock;
-
-    public ShowtimeTicketStatsService(
-            TicketRepository ticketRepository, SeatReservationRepository seatReservationRepository, Clock clock) {
-        this.ticketRepository = ticketRepository;
-        this.seatReservationRepository = seatReservationRepository;
-        this.clock = clock;
-    }
 
     @Transactional(readOnly = true)
     @Override

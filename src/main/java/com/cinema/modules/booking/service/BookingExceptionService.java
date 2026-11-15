@@ -7,7 +7,6 @@ import com.cinema.modules.auth.service.interfaces.IBranchAccessService;
 import com.cinema.modules.booking.dto.message.SeatStateChange;
 import com.cinema.modules.booking.dto.response.BookingDetailResponse;
 import com.cinema.modules.booking.dto.response.BookingExceptionResponse;
-import com.cinema.modules.booking.dto.response.BookingFnbLineResponse;
 import com.cinema.modules.booking.dto.response.BookingTicketResponse;
 import com.cinema.modules.booking.entity.Booking;
 import com.cinema.modules.booking.entity.BookingRefund;
@@ -27,6 +26,7 @@ import com.cinema.modules.payment.dto.response.RefundedPaymentResponse;
 import com.cinema.modules.payment.enums.PaymentMethod;
 import com.cinema.modules.payment.service.interfaces.IPaymentQueryService;
 import com.cinema.modules.payment.service.interfaces.IPaymentRefundService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -41,6 +41,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class BookingExceptionService implements IBookingExceptionService {
 
     private final BookingRepository bookingRepository;
@@ -56,35 +57,6 @@ public class BookingExceptionService implements IBookingExceptionService {
     private final TicketCodeGenerator ticketCodeGenerator;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final Clock clock;
-
-    public BookingExceptionService(
-            BookingRepository bookingRepository,
-            TicketRepository ticketRepository,
-            SeatReservationRepository seatReservationRepository,
-            BookingRefundRepository bookingRefundRepository,
-            IBookingDetailService bookingDetailService,
-            IBranchAccessService branchAccessService,
-            IPaymentQueryService paymentQueryService,
-            IPaymentRefundService paymentRefundService,
-            ISeatStatusBroadcaster seatStatusBroadcaster,
-            IAuditLogService auditLogService,
-            TicketCodeGenerator ticketCodeGenerator,
-            ApplicationEventPublisher applicationEventPublisher,
-            Clock clock) {
-        this.bookingRepository = bookingRepository;
-        this.ticketRepository = ticketRepository;
-        this.seatReservationRepository = seatReservationRepository;
-        this.bookingRefundRepository = bookingRefundRepository;
-        this.bookingDetailService = bookingDetailService;
-        this.branchAccessService = branchAccessService;
-        this.paymentQueryService = paymentQueryService;
-        this.paymentRefundService = paymentRefundService;
-        this.seatStatusBroadcaster = seatStatusBroadcaster;
-        this.auditLogService = auditLogService;
-        this.ticketCodeGenerator = ticketCodeGenerator;
-        this.applicationEventPublisher = applicationEventPublisher;
-        this.clock = clock;
-    }
 
     @Transactional(readOnly = true)
     @Override
@@ -131,8 +103,8 @@ public class BookingExceptionService implements IBookingExceptionService {
                 .map(BookingTicketResponse::seatLabel).toList());
         ticketRepository.deleteByBookingId(booking.getId());
         seatReservationRepository.deleteByBookingId(booking.getId());
-        Optional<RefundedPaymentResponse> refundedPayment =
-                paymentRefundService.markBookingPaymentRefunded(booking.getId());
+        Optional<RefundedPaymentResponse> refundedPayment = paymentRefundService
+                .markBookingPaymentRefunded(booking.getId());
         booking.setStatus(BookingStatus.REFUNDED);
         bookingRepository.save(booking);
         BookingRefund bookingRefund = new BookingRefund();

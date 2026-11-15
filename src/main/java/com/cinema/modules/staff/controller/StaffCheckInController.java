@@ -11,6 +11,7 @@ import com.cinema.modules.booking.dto.response.TicketScanResponse;
 import com.cinema.modules.booking.service.interfaces.ITicketCheckInQueueService;
 import com.cinema.modules.booking.service.interfaces.ITicketCheckInService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,17 +24,12 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/staff/check-in")
 public class StaffCheckInController {
 
     private final ITicketCheckInService ticketCheckInService;
     private final ITicketCheckInQueueService ticketCheckInQueueService;
-
-    public StaffCheckInController(
-            ITicketCheckInService ticketCheckInService, ITicketCheckInQueueService ticketCheckInQueueService) {
-        this.ticketCheckInService = ticketCheckInService;
-        this.ticketCheckInQueueService = ticketCheckInQueueService;
-    }
 
     @PostMapping("/scan")
     public ResponseEntity<ApiResponse<TicketScanResponse>> scan(

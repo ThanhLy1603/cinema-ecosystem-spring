@@ -32,6 +32,7 @@ import com.cinema.modules.booking.service.interfaces.IBookingDetailService;
 import com.cinema.modules.booking.service.interfaces.ITicketCheckInService;
 import com.cinema.modules.fnb.service.interfaces.IFnbQueryService;
 import com.cinema.modules.payment.service.interfaces.IPaymentQueryService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -53,6 +54,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class TicketCheckInService implements ITicketCheckInService {
 
     private static final String SCAN_CHANNEL = "CHECK_IN";
@@ -74,31 +76,6 @@ public class TicketCheckInService implements ITicketCheckInService {
     private final ScanGuard scanGuard;
     private final IAuditLogService auditLogService;
     private final Clock clock;
-
-    public TicketCheckInService(
-            BookingRepository bookingRepository,
-            TicketRepository ticketRepository,
-            TicketScanLogRepository ticketScanLogRepository,
-            IBookingDetailService bookingDetailService,
-            IBranchAccessService branchAccessService,
-            IUserQueryService userQueryService,
-            IFnbQueryService fnbQueryService,
-            IPaymentQueryService paymentQueryService,
-            ScanGuard scanGuard,
-            IAuditLogService auditLogService,
-            Clock clock) {
-        this.bookingRepository = bookingRepository;
-        this.ticketRepository = ticketRepository;
-        this.ticketScanLogRepository = ticketScanLogRepository;
-        this.bookingDetailService = bookingDetailService;
-        this.branchAccessService = branchAccessService;
-        this.userQueryService = userQueryService;
-        this.fnbQueryService = fnbQueryService;
-        this.paymentQueryService = paymentQueryService;
-        this.scanGuard = scanGuard;
-        this.auditLogService = auditLogService;
-        this.clock = clock;
-    }
 
     @Transactional
     @Override

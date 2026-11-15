@@ -1,18 +1,16 @@
 package com.cinema.modules.auth.scope;
 
 import com.cinema.modules.auth.service.interfaces.IBranchAccessService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
 @Component
+@RequiredArgsConstructor
 public class CinemaScopeResolver {
 
     private final IBranchAccessService branchAccessService;
-
-    public CinemaScopeResolver(IBranchAccessService branchAccessService) {
-        this.branchAccessService = branchAccessService;
-    }
 
     public CinemaScope resolve(Long userId, Long requestedCinemaId) {
         if (requestedCinemaId != null) {

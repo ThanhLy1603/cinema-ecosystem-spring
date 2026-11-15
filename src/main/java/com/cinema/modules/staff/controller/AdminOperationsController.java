@@ -20,6 +20,7 @@ import com.cinema.modules.staff.dto.response.ShiftResponse;
 import com.cinema.modules.staff.service.interfaces.IStaffRevenueService;
 import com.cinema.modules.staff.service.interfaces.IStaffShiftService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -35,6 +36,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/admin/operations")
 public class AdminOperationsController {
 
@@ -43,19 +45,6 @@ public class AdminOperationsController {
     private final IAuditLogService auditLogService;
     private final IStaffRevenueService staffRevenueService;
     private final IStaffShiftService staffShiftService;
-
-    public AdminOperationsController(
-            IOperationsHistoryService operationsHistoryService,
-            IBookingExceptionService bookingExceptionService,
-            IAuditLogService auditLogService,
-            IStaffRevenueService staffRevenueService,
-            IStaffShiftService staffShiftService) {
-        this.operationsHistoryService = operationsHistoryService;
-        this.bookingExceptionService = bookingExceptionService;
-        this.auditLogService = auditLogService;
-        this.staffRevenueService = staffRevenueService;
-        this.staffShiftService = staffShiftService;
-    }
 
     @GetMapping("/scan-logs")
     public ResponseEntity<ApiResponse<PageResponse<OperationsScanLogResponse>>> findScanLogs(

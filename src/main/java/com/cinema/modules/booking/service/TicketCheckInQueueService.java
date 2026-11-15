@@ -17,6 +17,7 @@ import com.cinema.modules.movie.dto.response.MovieInfoResponse;
 import com.cinema.modules.movie.service.interfaces.IMovieQueryService;
 import com.cinema.modules.showtime.dto.response.ShowtimeInfoResponse;
 import com.cinema.modules.showtime.service.interfaces.IShowtimeQueryService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class TicketCheckInQueueService implements ITicketCheckInQueueService {
 
     private static final Duration QUEUE_HORIZON = Duration.ofHours(24);
@@ -40,23 +42,6 @@ public class TicketCheckInQueueService implements ITicketCheckInQueueService {
     private final IMovieQueryService movieQueryService;
     private final ICinemaQueryService cinemaQueryService;
     private final Clock clock;
-
-    public TicketCheckInQueueService(
-            BookingRepository bookingRepository,
-            TicketRepository ticketRepository,
-            IBranchAccessService branchAccessService,
-            IShowtimeQueryService showtimeQueryService,
-            IMovieQueryService movieQueryService,
-            ICinemaQueryService cinemaQueryService,
-            Clock clock) {
-        this.bookingRepository = bookingRepository;
-        this.ticketRepository = ticketRepository;
-        this.branchAccessService = branchAccessService;
-        this.showtimeQueryService = showtimeQueryService;
-        this.movieQueryService = movieQueryService;
-        this.cinemaQueryService = cinemaQueryService;
-        this.clock = clock;
-    }
 
     @Transactional(readOnly = true)
     @Override

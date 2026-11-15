@@ -21,6 +21,7 @@ import com.cinema.modules.movie.dto.response.MovieInfoResponse;
 import com.cinema.modules.movie.service.interfaces.IMovieQueryService;
 import com.cinema.modules.showtime.dto.response.ShowtimeInfoResponse;
 import com.cinema.modules.showtime.service.interfaces.IShowtimeQueryService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +36,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
+@RequiredArgsConstructor
 public class BookingDetailService implements IBookingDetailService {
 
     private static final List<BookingStatus> MY_BOOKING_STATUSES =
@@ -50,27 +52,6 @@ public class BookingDetailService implements IBookingDetailService {
     private final ICinemaQueryService cinemaQueryService;
     private final QrCodeGenerator qrCodeGenerator;
     private final Clock clock;
-
-    public BookingDetailService(
-            BookingRepository bookingRepository,
-            SeatReservationRepository seatReservationRepository,
-            TicketRepository ticketRepository,
-            IBookingFnbService bookingFnbService,
-            IShowtimeQueryService showtimeQueryService,
-            IMovieQueryService movieQueryService,
-            ICinemaQueryService cinemaQueryService,
-            QrCodeGenerator qrCodeGenerator,
-            Clock clock) {
-        this.bookingRepository = bookingRepository;
-        this.seatReservationRepository = seatReservationRepository;
-        this.ticketRepository = ticketRepository;
-        this.bookingFnbService = bookingFnbService;
-        this.showtimeQueryService = showtimeQueryService;
-        this.movieQueryService = movieQueryService;
-        this.cinemaQueryService = cinemaQueryService;
-        this.qrCodeGenerator = qrCodeGenerator;
-        this.clock = clock;
-    }
 
     @Transactional(readOnly = true)
     @Override
