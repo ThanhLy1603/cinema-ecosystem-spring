@@ -2,6 +2,8 @@ package com.cinema.modules.fnb.service;
 
 import com.cinema.common.exception.AppException;
 import com.cinema.common.response.PageResponse;
+import com.cinema.modules.audit.enums.AuditAction;
+import com.cinema.modules.audit.service.PriceChangeAuditor;
 import com.cinema.modules.fnb.dto.request.FnbItemRequest;
 import com.cinema.modules.fnb.dto.response.FnbItemResponse;
 import com.cinema.modules.fnb.entity.FnbItem;
@@ -12,6 +14,7 @@ import com.cinema.modules.fnb.repository.FnbItemRepository;
 import com.cinema.modules.fnb.service.interfaces.IFnbItemAdminService;
 import com.cinema.modules.fnb.specification.FnbSpecifications;
 import com.cinema.modules.fnb.util.FnbMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,11 +24,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class FnbItemAdminService implements IFnbItemAdminService {
 
     static final int MAX_PAGE_SIZE = 100;
@@ -34,14 +39,7 @@ public class FnbItemAdminService implements IFnbItemAdminService {
     private final FnbItemRepository fnbItemRepository;
     private final FnbComboRepository fnbComboRepository;
     private final Clock clock;
-
-    public FnbItemAdminService(
-            FnbItemRepository fnbItemRepository, FnbComboRepository fnbComboRepository, Clock clock) {
-        this.fnbItemRepository = fnbItemRepository;
-        this.fnbComboRepository = fnbComboRepository;
-        this.clock = clock;
-    }
-
+    private final PriceChangeAuditor priceChangeAuditor;
     @Transactional(readOnly = true)
     @Override
     public PageResponse<FnbItemResponse> searchItems(
@@ -73,7 +71,10 @@ public class FnbItemAdminService implements IFnbItemAdminService {
         }
         FnbItem fnbItem = new FnbItem();
         applyRequest(fnbItem, fnbItemRequest);
-        return saveItem(fnbItem);
+        FnbItemResponse fnbItemResponse = saveItem(fnbItem);
+        priceChangeAuditor.recordInitialPrice(
+                AuditAction.FNB_ITEM_PRICE_CHANGED, "FNB_ITEM", fnbItemResponse.id(), name, fnbItemResponse.price());
+        return fnbItemResponse;
     }
 
     @Transactional
@@ -84,8 +85,12 @@ public class FnbItemAdminService implements IFnbItemAdminService {
         if (fnbItemRepository.existsByNameIgnoreCaseAndDeletedFalseAndIdNot(name, itemId)) {
             throw nameAlreadyUsed();
         }
+        BigDecimal oldPrice = fnbItem.getPrice();
         applyRequest(fnbItem, fnbItemRequest);
-        return saveItem(fnbItem);
+        FnbItemResponse fnbItemResponse = saveItem(fnbItem);
+        priceChangeAuditor.recordPriceChange(AuditAction.FNB_ITEM_PRICE_CHANGED, null, "FNB_ITEM", itemId, name,
+                oldPrice, fnbItemResponse.price());
+        return fnbItemResponse;
     }
 
     @Transactional

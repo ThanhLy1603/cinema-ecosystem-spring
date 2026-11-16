@@ -18,6 +18,7 @@ import com.cinema.modules.showtime.enums.ShowtimeConflictType;
 import com.cinema.modules.showtime.enums.ShowtimeStatus;
 import com.cinema.modules.showtime.exception.ShowtimeConflictException;
 import com.cinema.modules.showtime.repository.ShowtimeRepository;
+import com.cinema.modules.audit.service.PriceChangeAuditor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,6 +65,9 @@ class ShowtimeAdminServiceTest {
     private static final Instant END = Instant.parse("2026-01-02T12:45:00Z");
 
     @Mock
+    private PriceChangeAuditor priceChangeAuditor;
+
+    @Mock
     private ShowtimeRepository showtimeRepository;
 
     @Mock
@@ -98,7 +102,8 @@ class ShowtimeAdminServiceTest {
                 cinemaQueryService,
                 movieQueryService,
                 branchAccessService,
-                Clock.fixed(NOW, ZoneOffset.UTC));
+                Clock.fixed(NOW, ZoneOffset.UTC),
+                priceChangeAuditor);
         showtimeResponse = new ShowtimeResponse(
                 SHOWTIME_ID, MOVIE_ID, "Mai", AgeRating.C16, 105, CINEMA_ID, HALL_ID, "Phòng 01", ScreenType.SCREEN_2D,
                 START, END, END.plusSeconds(900), new BigDecimal("90000"), ShowtimeStatus.ACTIVE, false, true, true);

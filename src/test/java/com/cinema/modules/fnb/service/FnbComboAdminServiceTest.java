@@ -10,6 +10,7 @@ import com.cinema.modules.fnb.enums.FnbCategory;
 import com.cinema.modules.fnb.enums.FnbStatus;
 import com.cinema.modules.fnb.repository.FnbComboRepository;
 import com.cinema.modules.fnb.repository.FnbItemRepository;
+import com.cinema.modules.audit.service.PriceChangeAuditor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +44,9 @@ class FnbComboAdminServiceTest {
     private static final Instant NOW = Instant.parse("2026-11-10T00:00:00Z");
 
     @Mock
+    private PriceChangeAuditor priceChangeAuditor;
+
+    @Mock
     private FnbComboRepository fnbComboRepository;
 
     @Mock
@@ -55,7 +59,7 @@ class FnbComboAdminServiceTest {
     @BeforeEach
     void setUp() {
         fnbComboAdminService =
-                new FnbComboAdminService(fnbComboRepository, fnbItemRepository, Clock.fixed(NOW, ZoneOffset.UTC));
+                new FnbComboAdminService(fnbComboRepository, fnbItemRepository, Clock.fixed(NOW, ZoneOffset.UTC), priceChangeAuditor);
         popcornItem = item(POPCORN_ID, "Bắp lớn", FnbCategory.POPCORN, "60000");
         drinkItem = item(DRINK_ID, "Pepsi", FnbCategory.DRINK, "30000");
     }

@@ -2,6 +2,8 @@ package com.cinema.modules.showtime.service;
 
 import com.cinema.common.exception.AppException;
 import com.cinema.common.util.BusinessZone;
+import com.cinema.modules.audit.enums.AuditAction;
+import com.cinema.modules.audit.service.PriceChangeAuditor;
 import com.cinema.modules.auth.service.interfaces.IBranchAccessService;
 import com.cinema.modules.cinema.dto.response.HallInfoResponse;
 import com.cinema.modules.cinema.service.interfaces.ICinemaQueryService;
@@ -15,11 +17,13 @@ import com.cinema.modules.showtime.enums.ShowtimeStatus;
 import com.cinema.modules.showtime.repository.ShowtimeRepository;
 import com.cinema.modules.showtime.service.interfaces.IShowtimeAdminService;
 import com.cinema.modules.showtime.specification.ShowtimeSpecifications;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -27,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class ShowtimeAdminService implements IShowtimeAdminService {
 
     private static final Sort SHOWTIME_SORT = Sort.by("startTime", "id");
@@ -40,28 +45,7 @@ public class ShowtimeAdminService implements IShowtimeAdminService {
     private final IMovieQueryService movieQueryService;
     private final IBranchAccessService branchAccessService;
     private final Clock clock;
-
-    public ShowtimeAdminService(
-            ShowtimeRepository showtimeRepository,
-            ShowtimeSlotPlanner showtimeSlotPlanner,
-            ShowtimePersister showtimePersister,
-            ShowtimeBookingChecker showtimeBookingChecker,
-            ShowtimeViewAssembler showtimeViewAssembler,
-            ICinemaQueryService cinemaQueryService,
-            IMovieQueryService movieQueryService,
-            IBranchAccessService branchAccessService,
-            Clock clock) {
-        this.showtimeRepository = showtimeRepository;
-        this.showtimeSlotPlanner = showtimeSlotPlanner;
-        this.showtimePersister = showtimePersister;
-        this.showtimeBookingChecker = showtimeBookingChecker;
-        this.showtimeViewAssembler = showtimeViewAssembler;
-        this.cinemaQueryService = cinemaQueryService;
-        this.movieQueryService = movieQueryService;
-        this.branchAccessService = branchAccessService;
-        this.clock = clock;
-    }
-
+    private final PriceChangeAuditor priceChangeAuditor;
     @Override
     public List<ShowtimeResponse> listShowtimes(
             Long actorUserId, Long cinemaId, LocalDate date, Long movieId, ShowtimeStatus showtimeStatus) {
@@ -109,8 +93,10 @@ public class ShowtimeAdminService implements IShowtimeAdminService {
         }
         assertNoBookings(showtime, now, "Suất chiếu đã có vé hoặc ghế đang được giữ, không thể chỉnh sửa");
         PlannedShowtimeSlot showtimeSlot = planSlot(actorUserId, showtimeRequest, now, showtimeId);
+        BigDecimal oldBasePrice = showtime.getBasePrice();
         applySlot(showtime, showtimeRequest, showtimeSlot);
         Showtime savedShowtime = showtimePersister.saveWithoutOverlap(showtime, showtimeSlot, showtimeId);
+        recordBasePriceChange(savedShowtime, oldBasePrice);
         return showtimeViewAssembler.toShowtimeResponses(List.of(savedShowtime), now).get(0);
     }
 
@@ -152,6 +138,19 @@ public class ShowtimeAdminService implements IShowtimeAdminService {
         showtime.setEndTime(showtimeSlot.endTime());
         showtime.setBasePrice(showtimeRequest.basePrice());
         showtime.setStatus(ShowtimeStatus.ACTIVE);
+    }
+
+    private void recordBasePriceChange(Showtime showtime, BigDecimal oldBasePrice) {
+        HallInfoResponse hallInfoResponse =
+                cinemaQueryService.findHallInfos(List.of(showtime.getHallId())).get(showtime.getHallId());
+        priceChangeAuditor.recordPriceChange(
+                AuditAction.SHOWTIME_PRICE_CHANGED,
+                hallInfoResponse == null ? null : hallInfoResponse.cinemaId(),
+                "SHOWTIME",
+                showtime.getId(),
+                "Giá cơ bản suất chiếu " + showtime.getId(),
+                oldBasePrice,
+                showtime.getBasePrice());
     }
 
     private Showtime loadShowtime(Long showtimeId) {

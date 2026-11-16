@@ -2,6 +2,8 @@ package com.cinema.modules.fnb.service;
 
 import com.cinema.common.exception.AppException;
 import com.cinema.common.response.PageResponse;
+import com.cinema.modules.audit.enums.AuditAction;
+import com.cinema.modules.audit.service.PriceChangeAuditor;
 import com.cinema.modules.fnb.dto.request.FnbComboItemRequest;
 import com.cinema.modules.fnb.dto.request.FnbComboRequest;
 import com.cinema.modules.fnb.dto.response.FnbComboResponse;
@@ -14,6 +16,7 @@ import com.cinema.modules.fnb.repository.FnbItemRepository;
 import com.cinema.modules.fnb.service.interfaces.IFnbComboAdminService;
 import com.cinema.modules.fnb.specification.FnbSpecifications;
 import com.cinema.modules.fnb.util.FnbMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -33,6 +37,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class FnbComboAdminService implements IFnbComboAdminService {
 
     static final int MAX_PAGE_SIZE = 100;
@@ -41,14 +46,7 @@ public class FnbComboAdminService implements IFnbComboAdminService {
     private final FnbComboRepository fnbComboRepository;
     private final FnbItemRepository fnbItemRepository;
     private final Clock clock;
-
-    public FnbComboAdminService(
-            FnbComboRepository fnbComboRepository, FnbItemRepository fnbItemRepository, Clock clock) {
-        this.fnbComboRepository = fnbComboRepository;
-        this.fnbItemRepository = fnbItemRepository;
-        this.clock = clock;
-    }
-
+    private final PriceChangeAuditor priceChangeAuditor;
     @Transactional(readOnly = true)
     @Override
     public PageResponse<FnbComboResponse> searchCombos(
@@ -83,7 +81,10 @@ public class FnbComboAdminService implements IFnbComboAdminService {
         applyRequest(fnbCombo, fnbComboRequest);
         FnbCombo savedFnbCombo = saveCombo(fnbCombo);
         savedFnbCombo.replaceItems(fnbItemsById, quantitiesByItemId);
-        return FnbMapper.toFnbComboResponse(saveCombo(savedFnbCombo));
+        FnbComboResponse fnbComboResponse = FnbMapper.toFnbComboResponse(saveCombo(savedFnbCombo));
+        priceChangeAuditor.recordInitialPrice(AuditAction.FNB_COMBO_PRICE_CHANGED, "FNB_COMBO", fnbComboResponse.id(),
+                name, fnbComboResponse.price());
+        return fnbComboResponse;
     }
 
     @Transactional
@@ -96,9 +97,13 @@ public class FnbComboAdminService implements IFnbComboAdminService {
         }
         Map<Long, Integer> quantitiesByItemId = toQuantitiesByItemId(fnbComboRequest.items());
         Map<Long, FnbItem> fnbItemsById = loadActiveItems(quantitiesByItemId.keySet());
+        BigDecimal oldPrice = fnbCombo.getPrice();
         applyRequest(fnbCombo, fnbComboRequest);
         fnbCombo.replaceItems(fnbItemsById, quantitiesByItemId);
-        return FnbMapper.toFnbComboResponse(saveCombo(fnbCombo));
+        FnbComboResponse fnbComboResponse = FnbMapper.toFnbComboResponse(saveCombo(fnbCombo));
+        priceChangeAuditor.recordPriceChange(AuditAction.FNB_COMBO_PRICE_CHANGED, null, "FNB_COMBO", comboId, name,
+                oldPrice, fnbComboResponse.price());
+        return fnbComboResponse;
     }
 
     @Transactional

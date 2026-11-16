@@ -8,6 +8,8 @@ import com.cinema.modules.showtime.entity.PriceRule;
 import com.cinema.modules.showtime.enums.PriceDayType;
 import com.cinema.modules.showtime.enums.PriceRuleType;
 import com.cinema.modules.showtime.repository.PriceRuleRepository;
+import com.cinema.modules.audit.enums.AuditAction;
+import com.cinema.modules.audit.service.PriceChangeAuditor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +33,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,13 +46,16 @@ class PriceRuleAdminServiceTest {
     private static final Instant NOW = Instant.parse("2026-01-01T00:00:00Z");
 
     @Mock
+    private PriceChangeAuditor priceChangeAuditor;
+
+    @Mock
     private PriceRuleRepository priceRuleRepository;
 
     private PriceRuleAdminService priceRuleAdminService;
 
     @BeforeEach
     void setUp() {
-        priceRuleAdminService = new PriceRuleAdminService(priceRuleRepository, Clock.fixed(NOW, ZoneOffset.UTC));
+        priceRuleAdminService = new PriceRuleAdminService(priceRuleRepository, Clock.fixed(NOW, ZoneOffset.UTC), priceChangeAuditor);
     }
 
     private PriceRuleRequest request(
@@ -206,6 +213,41 @@ class PriceRuleAdminServiceTest {
         assertNull(existing.getScreenType());
         assertEquals(LocalTime.of(18, 0), existing.getTimeFrom());
         assertEquals(PriceRuleType.TIME_SLOT, existing.resolveRuleType());
+    }
+
+    @Test
+    void updateRecordsBeforeAndAfterDescriptionInHistory() {
+        PriceRule existing = new PriceRule();
+        existing.setId(RULE_ID);
+        existing.setRuleName("Quy tắc thử");
+        existing.setSurchargeAmount(new BigDecimal("30000"));
+        existing.setScreenType(ScreenType.IMAX);
+        when(priceRuleRepository.findById(RULE_ID)).thenReturn(Optional.of(existing));
+        givenSaveEchoesEntity();
+
+        priceRuleAdminService.updatePriceRule(RULE_ID, request(
+                PriceRuleType.SCREEN_TYPE, null, null, null, ScreenType.IMAX, null, null));
+
+        verify(priceChangeAuditor).recordDetail(
+                eq(AuditAction.PRICE_RULE_UPDATED), isNull(), eq("PRICE_RULE"), eq(RULE_ID),
+                eq("Quy tắc thử, phụ thu 30.000đ, loại ngày ALL, màn hình IMAX"
+                        + " → Quy tắc thử, phụ thu 15.000đ, loại ngày ALL, màn hình IMAX"));
+    }
+
+    @Test
+    void updateWithoutRealChangeWritesNoHistory() {
+        PriceRule existing = new PriceRule();
+        existing.setId(RULE_ID);
+        existing.setRuleName("Quy tắc thử");
+        existing.setSurchargeAmount(new BigDecimal("15000"));
+        existing.setScreenType(ScreenType.IMAX);
+        when(priceRuleRepository.findById(RULE_ID)).thenReturn(Optional.of(existing));
+        givenSaveEchoesEntity();
+
+        priceRuleAdminService.updatePriceRule(RULE_ID, request(
+                PriceRuleType.SCREEN_TYPE, null, null, null, ScreenType.IMAX, null, null));
+
+        verify(priceChangeAuditor, never()).recordDetail(any(), any(), any(), any(), any());
     }
 
     @Test

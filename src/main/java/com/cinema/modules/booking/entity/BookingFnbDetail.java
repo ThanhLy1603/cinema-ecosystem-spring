@@ -36,7 +36,7 @@ public class BookingFnbDetail {
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
-    @Column(name = "unit_price", nullable = false, precision = 12, scale = 2)
+    @Column(name = "unit_price", nullable = false, precision = 12, scale = 2, updatable = false)
     private BigDecimal unitPrice;
 
     @Column(name = "delivered_quantity", nullable = false)

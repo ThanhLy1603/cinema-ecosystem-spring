@@ -80,7 +80,7 @@ public class AuditLogService implements IAuditLogService {
             return new PageResponse<>(List.of(), page, size, 0, 0);
         }
         Page<AuditLog> auditLogs = auditLogRepository.findAll(
-                buildSpecification(cinemaScope, actorUserId, auditAction, from, to),
+                buildSpecification(cinemaScope, cinemaId == null, actorUserId, auditAction, from, to),
                 PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), MAX_PAGE_SIZE),
                         Sort.by(Sort.Direction.DESC, "id")));
         Map<Long, String> actorNames = new HashMap<>();
@@ -108,11 +108,19 @@ public class AuditLogService implements IAuditLogService {
     }
 
     private Specification<AuditLog> buildSpecification(
-            CinemaScope cinemaScope, Long actorUserId, AuditAction auditAction, Instant from, Instant to) {
+            CinemaScope cinemaScope,
+            boolean includeGlobalLogs,
+            Long actorUserId,
+            AuditAction auditAction,
+            Instant from,
+            Instant to) {
         return (auditLog, criteriaQuery, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (!cinemaScope.allCinemas()) {
-                predicates.add(auditLog.get("cinemaId").in(cinemaScope.cinemaIds()));
+                Predicate inScope = auditLog.get("cinemaId").in(cinemaScope.cinemaIds());
+                predicates.add(includeGlobalLogs
+                        ? criteriaBuilder.or(inScope, criteriaBuilder.isNull(auditLog.get("cinemaId")))
+                        : inScope);
             }
             if (actorUserId != null) {
                 predicates.add(criteriaBuilder.equal(auditLog.get("actorUserId"), actorUserId));

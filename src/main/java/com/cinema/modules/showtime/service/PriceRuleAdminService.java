@@ -1,6 +1,9 @@
 package com.cinema.modules.showtime.service;
 
 import com.cinema.common.exception.AppException;
+import com.cinema.common.util.VndFormatter;
+import com.cinema.modules.audit.enums.AuditAction;
+import com.cinema.modules.audit.service.PriceChangeAuditor;
 import com.cinema.modules.showtime.dto.request.PriceRuleRequest;
 import com.cinema.modules.showtime.dto.response.PriceRuleResponse;
 import com.cinema.modules.showtime.entity.PriceRule;
@@ -8,6 +11,7 @@ import com.cinema.modules.showtime.enums.PriceDayType;
 import com.cinema.modules.showtime.repository.PriceRuleRepository;
 import com.cinema.modules.showtime.service.interfaces.IPriceRuleAdminService;
 import com.cinema.modules.showtime.util.PriceRuleMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,18 +22,14 @@ import java.time.Instant;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class PriceRuleAdminService implements IPriceRuleAdminService {
 
     private static final String INVALID_RULE_ERROR_CODE = "INVALID_PRICE_RULE";
 
     private final PriceRuleRepository priceRuleRepository;
     private final Clock clock;
-
-    public PriceRuleAdminService(PriceRuleRepository priceRuleRepository, Clock clock) {
-        this.priceRuleRepository = priceRuleRepository;
-        this.clock = clock;
-    }
-
+    private final PriceChangeAuditor priceChangeAuditor;
     @Transactional(readOnly = true)
     @Override
     public List<PriceRuleResponse> listPriceRules(boolean deleted) {
@@ -47,7 +47,10 @@ public class PriceRuleAdminService implements IPriceRuleAdminService {
         }
         PriceRule priceRule = new PriceRule();
         applyRequest(priceRule, priceRuleRequest, ruleName);
-        return savePriceRule(priceRule);
+        PriceRuleResponse priceRuleResponse = savePriceRule(priceRule);
+        priceChangeAuditor.recordDetail(AuditAction.PRICE_RULE_CREATED, null, "PRICE_RULE", priceRuleResponse.id(),
+                "Tạo quy tắc: " + describe(priceRule));
+        return priceRuleResponse;
     }
 
     @Transactional
@@ -58,8 +61,15 @@ public class PriceRuleAdminService implements IPriceRuleAdminService {
         if (priceRuleRepository.existsByRuleNameIgnoreCaseAndDeletedFalseAndIdNot(ruleName, priceRuleId)) {
             throw nameAlreadyUsed();
         }
+        String descriptionBefore = describe(priceRule);
         applyRequest(priceRule, priceRuleRequest, ruleName);
-        return savePriceRule(priceRule);
+        PriceRuleResponse priceRuleResponse = savePriceRule(priceRule);
+        String descriptionAfter = describe(priceRule);
+        if (!descriptionBefore.equals(descriptionAfter)) {
+            priceChangeAuditor.recordDetail(AuditAction.PRICE_RULE_UPDATED, null, "PRICE_RULE", priceRuleId,
+                    descriptionBefore + " → " + descriptionAfter);
+        }
+        return priceRuleResponse;
     }
 
     @Transactional
@@ -68,6 +78,8 @@ public class PriceRuleAdminService implements IPriceRuleAdminService {
         PriceRule priceRule = loadPriceRule(priceRuleId, false);
         priceRule.markDeleted(Instant.now(clock));
         priceRuleRepository.save(priceRule);
+        priceChangeAuditor.recordDetail(AuditAction.PRICE_RULE_DELETED, null, "PRICE_RULE", priceRuleId,
+                "Xóa quy tắc: " + describe(priceRule));
     }
 
     @Transactional
@@ -78,7 +90,26 @@ public class PriceRuleAdminService implements IPriceRuleAdminService {
             throw nameAlreadyUsed();
         }
         priceRule.restore();
-        return savePriceRule(priceRule);
+        PriceRuleResponse priceRuleResponse = savePriceRule(priceRule);
+        priceChangeAuditor.recordDetail(AuditAction.PRICE_RULE_RESTORED, null, "PRICE_RULE", priceRuleId,
+                "Khôi phục quy tắc: " + describe(priceRule));
+        return priceRuleResponse;
+    }
+
+    private String describe(PriceRule priceRule) {
+        StringBuilder description = new StringBuilder(priceRule.getRuleName())
+                .append(", phụ thu ").append(VndFormatter.format(priceRule.getSurchargeAmount()))
+                .append(", loại ngày ").append(priceRule.getDayType());
+        if (priceRule.getTimeFrom() != null || priceRule.getTimeTo() != null) {
+            description.append(", khung giờ ").append(priceRule.getTimeFrom()).append("-").append(priceRule.getTimeTo());
+        }
+        if (priceRule.getScreenType() != null) {
+            description.append(", màn hình ").append(priceRule.getScreenType().getCode());
+        }
+        if (priceRule.getValidFrom() != null || priceRule.getValidTo() != null) {
+            description.append(", hiệu lực ").append(priceRule.getValidFrom()).append(" đến ").append(priceRule.getValidTo());
+        }
+        return description.toString();
     }
 
     private void applyRequest(PriceRule priceRule, PriceRuleRequest priceRuleRequest, String ruleName) {

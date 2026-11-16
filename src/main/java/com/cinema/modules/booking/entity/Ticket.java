@@ -39,7 +39,7 @@ public class Ticket {
     @Column(name = "qr_code_url", columnDefinition = "TEXT")
     private String qrCodeUrl;
 
-    @Column(name = "price", nullable = false, precision = 12, scale = 2)
+    @Column(name = "price", nullable = false, precision = 12, scale = 2, updatable = false)
     private BigDecimal price;
 
     @Column(name = "checked_in")

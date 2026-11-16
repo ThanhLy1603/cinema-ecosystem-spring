@@ -8,6 +8,8 @@ import com.cinema.modules.fnb.enums.FnbCategory;
 import com.cinema.modules.fnb.enums.FnbStatus;
 import com.cinema.modules.fnb.repository.FnbComboRepository;
 import com.cinema.modules.fnb.repository.FnbItemRepository;
+import com.cinema.modules.audit.enums.AuditAction;
+import com.cinema.modules.audit.service.PriceChangeAuditor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +41,9 @@ class FnbItemAdminServiceTest {
     private static final Instant NOW = Instant.parse("2026-11-10T00:00:00Z");
 
     @Mock
+    private PriceChangeAuditor priceChangeAuditor;
+
+    @Mock
     private FnbItemRepository fnbItemRepository;
 
     @Mock
@@ -49,7 +54,7 @@ class FnbItemAdminServiceTest {
     @BeforeEach
     void setUp() {
         fnbItemAdminService =
-                new FnbItemAdminService(fnbItemRepository, fnbComboRepository, Clock.fixed(NOW, ZoneOffset.UTC));
+                new FnbItemAdminService(fnbItemRepository, fnbComboRepository, Clock.fixed(NOW, ZoneOffset.UTC), priceChangeAuditor);
     }
 
     private FnbItemRequest request(String name) {
@@ -88,6 +93,28 @@ class FnbItemAdminServiceTest {
         assertNull(fnbItemResponse.imageUrl());
         assertEquals(FnbCategory.POPCORN, fnbItemResponse.category());
         assertFalse(fnbItemResponse.deleted());
+    }
+
+    @Test
+    void createRecordsInitialPriceInHistory() {
+        stubSave();
+
+        fnbItemAdminService.createItem(request("Bắp mặn"));
+
+        verify(priceChangeAuditor).recordInitialPrice(
+                AuditAction.FNB_ITEM_PRICE_CHANGED, "FNB_ITEM", ITEM_ID, "Bắp mặn", new BigDecimal("55000"));
+    }
+
+    @Test
+    void updateRecordsOldAndNewPriceInHistory() {
+        stubSave();
+        when(fnbItemRepository.findById(ITEM_ID)).thenReturn(Optional.of(existingItem(false)));
+
+        fnbItemAdminService.updateItem(ITEM_ID, request("Bắp ngọt"));
+
+        verify(priceChangeAuditor).recordPriceChange(
+                AuditAction.FNB_ITEM_PRICE_CHANGED, null, "FNB_ITEM", ITEM_ID, "Bắp ngọt",
+                new BigDecimal("45000"), new BigDecimal("55000"));
     }
 
     @Test
