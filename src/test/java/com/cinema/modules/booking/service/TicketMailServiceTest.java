@@ -57,8 +57,7 @@ class TicketMailServiceTest {
                 javaMailSender,
                 new AppMailProperties("CinemaSphere <noreply@example.com>", "http://localhost:3000/"),
                 bookingDetailService,
-                userQueryService,
-                new QrCodeGenerator());
+                userQueryService);
     }
 
     private BookingDetailResponse bookingDetail(String movieTitle) {

@@ -31,7 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.util.Base64;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -49,7 +48,6 @@ public class TicketMailService implements ITicketMailService {
     private final AppMailProperties appMailProperties;
     private final IBookingDetailService bookingDetailService;
     private final IUserQueryService userQueryService;
-    private final QrCodeGenerator qrCodeGenerator;
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)

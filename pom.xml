@@ -11,9 +11,9 @@
 	</parent>
 	
 	<groupId>com.cinema</groupId>
-	<artifactId>cinema-ecosystem-backend</artifactId>
+	<artifactId>cinema-ecosystem-spring</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>cinema-ecosystem-backend</name>
+	<name>cinema-ecosystem-spring</name>
 	<description>Cinema Ecosystem Backend Modular Monolith Spring Boot 3.3</description>
 	
 	<properties>
