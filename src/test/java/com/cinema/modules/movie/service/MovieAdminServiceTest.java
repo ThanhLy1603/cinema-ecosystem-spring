@@ -287,6 +287,37 @@ class MovieAdminServiceTest {
     }
 
     @Test
+    void updateRejectsReturningToDraftWhileUpcomingShowtimesExist() {
+        Movie movie = existingMovie(131, MovieStatus.NOW_SHOWING);
+        when(movieViewAssembler.loadMovieWithGenres(MOVIE_ID, false)).thenReturn(movie);
+        when(movieUsageChecker.countUpcomingShowtimesByMovie(MOVIE_ID, NOW)).thenReturn(1L);
+        MovieRequest draftMovieRequest = new MovieRequest(
+                "Mai", null, null, 131, LocalDate.of(2026, 2, 10), null, AgeRating.C16, null, null, null, null,
+                MovieStatus.DRAFT, List.of(), List.of());
+
+        AppException appException =
+                assertThrows(AppException.class, () -> movieAdminService.updateMovie(MOVIE_ID, draftMovieRequest));
+
+        assertEquals("MOVIE_HAS_UPCOMING_SHOWTIMES", appException.getErrorCode());
+        verify(movieRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void changeStatusKeepsTheShowtimeRules() {
+        Movie movie = existingMovie(131, MovieStatus.NOW_SHOWING);
+        when(movieRepository.findActiveByIdForUpdate(MOVIE_ID)).thenReturn(Optional.of(movie));
+        when(movieUsageChecker.countUpcomingShowtimesByMovie(MOVIE_ID, NOW)).thenReturn(1L);
+
+        AppException appException = assertThrows(
+                AppException.class, () -> movieAdminService.changeStatus(MOVIE_ID, MovieStatus.DRAFT));
+        movieAdminService.changeStatus(MOVIE_ID, MovieStatus.COMING_SOON);
+
+        assertEquals("MOVIE_HAS_UPCOMING_SHOWTIMES", appException.getErrorCode());
+        assertEquals(MovieStatus.COMING_SOON, movie.getStatus());
+        verify(movieRepository).save(movie);
+    }
+
+    @Test
     void updateSkipsShowtimeLookupWhenDurationAndStatusAreUnchanged() {
         Movie movie = existingMovie(131, MovieStatus.NOW_SHOWING);
         when(movieViewAssembler.loadMovieWithGenres(MOVIE_ID, false)).thenReturn(movie);

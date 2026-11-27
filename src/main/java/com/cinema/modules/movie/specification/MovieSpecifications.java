@@ -27,6 +27,10 @@ public final class MovieSpecifications {
         return specification;
     }
 
+    public static Specification<Movie> publiclyVisible() {
+        return (movie, criteriaQuery, criteriaBuilder) -> criteriaBuilder.notEqual(movie.get("status"), MovieStatus.DRAFT);
+    }
+
     static Specification<Movie> statusFilter(MovieStatus status) {
         if (status == null) {
             return null;

@@ -26,7 +26,10 @@ class MovieControllerAuthorizationTest {
     @Test
     void controllersAreOpenToStaffOnly() {
         for (Class<?> controllerClass : new Class<?>[] {
-                AdminMovieController.class, AdminGenreController.class, AdminPersonController.class}) {
+                AdminMovieController.class, AdminGenreController.class, AdminPersonController.class,
+                AdminMovieImportController.class, AdminMovieMediaController.class,
+                AdminMovieStatusController.class, AdminCatalogImportController.class,
+                AdminMovieExportController.class}) {
             PreAuthorize preAuthorize = controllerClass.getAnnotation(PreAuthorize.class);
             assertNotNull(preAuthorize);
             assertEquals(STAFF, preAuthorize.value());

@@ -6,6 +6,7 @@ import com.cinema.modules.movie.dto.response.MovieDetailResponse;
 import com.cinema.modules.movie.dto.response.MovieResponse;
 import com.cinema.modules.movie.entity.Movie;
 import com.cinema.modules.movie.entity.MovieCast;
+import com.cinema.modules.movie.enums.MovieStatus;
 import com.cinema.modules.movie.repository.MovieCastRepository;
 import com.cinema.modules.movie.repository.MovieRepository;
 import com.cinema.modules.movie.util.MovieMapper;
@@ -61,6 +62,7 @@ public class MovieViewAssembler {
 
     public MovieDetailResponse getMovieDetailBySlug(String movieSlug) {
         Movie movie = movieRepository.findWithGenresBySlugAndDeleted(movieSlug, false)
+                .filter(foundMovie -> foundMovie.getStatus() != MovieStatus.DRAFT)
                 .orElseThrow(MovieViewAssembler::movieNotFound);
         List<MovieCast> movieCasts = movieCastRepository.findByMovieIdInOrderByIdAsc(List.of(movie.getId()));
         return MovieMapper.toMovieDetailResponse(movie, movieCasts);

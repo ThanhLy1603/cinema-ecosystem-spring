@@ -67,6 +67,8 @@ public class MoviePublicService implements IMoviePublicService {
     private PageResponse<MovieResponse> loadMovies(
             String keyword, Long genreId, MovieStatus status, AgeRating rated, int page, int size) {
         return movieViewAssembler.searchMovies(
-                MovieSpecifications.search(keyword, genreId, status, rated, false), page, size);
+                MovieSpecifications.search(keyword, genreId, status, rated, false).and(MovieSpecifications.publiclyVisible()),
+                page,
+                size);
     }
 }

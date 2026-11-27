@@ -3,6 +3,7 @@ package com.cinema.modules.movie.util;
 import com.cinema.modules.movie.dto.response.GenreResponse;
 import com.cinema.modules.movie.dto.response.MovieCastResponse;
 import com.cinema.modules.movie.dto.response.MovieDetailResponse;
+import com.cinema.modules.movie.dto.response.MovieMediaTargetResponse;
 import com.cinema.modules.movie.dto.response.MovieResponse;
 import com.cinema.modules.movie.dto.response.PersonResponse;
 import com.cinema.modules.movie.entity.Genre;
@@ -68,6 +69,17 @@ public final class MovieMapper {
                 toGenreResponses(movie),
                 movieCasts.stream().map(MovieMapper::toMovieCastResponse).toList(),
                 movie.isDeleted());
+    }
+
+    public static MovieMediaTargetResponse toMovieMediaTargetResponse(Movie movie) {
+        return new MovieMediaTargetResponse(
+                movie.getId(),
+                movie.getTitle(),
+                movie.getSlug(),
+                movie.getStatus(),
+                movie.getPosterUrl(),
+                movie.getBannerUrl(),
+                movie.getTrailerUrl());
     }
 
     private static List<GenreResponse> toGenreResponses(Movie movie) {

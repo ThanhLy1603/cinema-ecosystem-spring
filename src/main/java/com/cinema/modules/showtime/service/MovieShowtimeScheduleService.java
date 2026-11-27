@@ -9,6 +9,7 @@ import com.cinema.modules.cinema.dto.response.HallInfoResponse;
 import com.cinema.modules.cinema.enums.HallStatus;
 import com.cinema.modules.cinema.service.interfaces.ICinemaQueryService;
 import com.cinema.modules.movie.dto.response.MovieInfoResponse;
+import com.cinema.modules.movie.enums.MovieStatus;
 import com.cinema.modules.movie.service.interfaces.IMovieQueryService;
 import com.cinema.modules.showtime.dto.response.BookableShowtimeResponse;
 import com.cinema.modules.showtime.dto.response.CinemaShowtimesResponse;
@@ -123,7 +124,7 @@ public class MovieShowtimeScheduleService implements IMovieShowtimeScheduleServi
 
     private void requireVisibleMovie(Long movieId) {
         MovieInfoResponse movieInfoResponse = movieQueryService.findMovieInfos(List.of(movieId)).get(movieId);
-        if (movieInfoResponse == null || movieInfoResponse.deleted()) {
+        if (movieInfoResponse == null || movieInfoResponse.deleted() || movieInfoResponse.status() == MovieStatus.DRAFT) {
             throw new AppException("Không tìm thấy phim", HttpStatus.NOT_FOUND, "MOVIE_NOT_FOUND");
         }
     }

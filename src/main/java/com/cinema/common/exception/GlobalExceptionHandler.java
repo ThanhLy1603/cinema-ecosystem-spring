@@ -14,6 +14,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -93,6 +96,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error("Thiếu tham số '" + missingServletRequestParameterException.getParameterName()
                         + "'", "MISSING_PARAMETER"));
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMaxUploadSizeExceeded(
+            MaxUploadSizeExceededException maxUploadSizeExceededException) {
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(ApiResponse.error("Tệp tải lên tối đa 2 MB", "FILE_TOO_LARGE"));
+    }
+
+    @ExceptionHandler({MultipartException.class, MissingServletRequestPartException.class})
+    public ResponseEntity<ApiResponse<Void>> handleInvalidMultipart(Exception exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error("Không đọc được tệp tải lên", "INVALID_UPLOAD"));
     }
 
     @ExceptionHandler(NoResourceFoundException.class)

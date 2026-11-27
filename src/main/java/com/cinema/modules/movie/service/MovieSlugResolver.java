@@ -52,8 +52,12 @@ public class MovieSlugResolver {
         return generateUniqueSlug(movie.getTitle());
     }
 
+    public String proposeSlug(String title) {
+        return truncate(SlugGenerator.toSlug(title, FALLBACK_SLUG));
+    }
+
     private String generateUniqueSlug(String title) {
-        String baseSlug = truncate(SlugGenerator.toSlug(title, FALLBACK_SLUG));
+        String baseSlug = proposeSlug(title);
         String slug = baseSlug;
         for (int attempt = 2; movieRepository.existsBySlugAndDeletedFalse(slug); attempt++) {
             if (attempt > MAX_SLUG_ATTEMPTS) {

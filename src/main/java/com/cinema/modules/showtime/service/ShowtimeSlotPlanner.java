@@ -62,6 +62,10 @@ public class ShowtimeSlotPlanner {
         if (movieInfoResponse == null || movieInfoResponse.deleted()) {
             throw new AppException("Không tìm thấy phim", HttpStatus.NOT_FOUND, "MOVIE_NOT_FOUND");
         }
+        if (movieInfoResponse.status() == MovieStatus.DRAFT) {
+            throw new AppException(
+                    "Phim đang là bản nháp, hãy công bố phim trước khi xếp lịch chiếu", HttpStatus.CONFLICT, "MOVIE_DRAFT");
+        }
         if (movieInfoResponse.status() == MovieStatus.ENDED) {
             throw new AppException("Phim đã ngừng chiếu, không thể xếp lịch chiếu", HttpStatus.CONFLICT, "MOVIE_ENDED");
         }

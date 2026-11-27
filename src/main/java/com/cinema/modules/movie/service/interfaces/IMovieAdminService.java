@@ -18,6 +18,8 @@ public interface IMovieAdminService {
 
     MovieDetailResponse updateMovie(Long movieId, MovieRequest movieRequest);
 
+    void changeStatus(Long movieId, MovieStatus status);
+
     void deleteMovie(Long movieId);
 
     MovieDetailResponse restoreMovie(Long movieId);

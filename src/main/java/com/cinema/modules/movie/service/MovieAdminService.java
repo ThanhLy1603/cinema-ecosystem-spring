@@ -99,12 +99,23 @@ public class MovieAdminService implements IMovieAdminService {
     public MovieDetailResponse updateMovie(Long movieId, MovieRequest movieRequest) {
         validateDates(movieRequest);
         Movie movie = movieViewAssembler.loadMovieWithGenres(movieId, false);
-        assertScheduledShowtimesStayConsistent(movie, movieRequest);
+        assertScheduledShowtimesStayConsistent(movie, movieRequest.durationMinutes(), movieRequest.status());
         applyRequest(movie, movieRequest);
         movie.setSlug(movieSlugResolver.resolveForUpdate(movie, movieRequest.slug()));
         Movie savedMovie = saveMovie(movie);
         List<MovieCast> movieCasts = replaceCasts(movieId, movieRequest.casts());
         return MovieMapper.toMovieDetailResponse(savedMovie, movieCasts);
+    }
+
+    @Transactional
+    @Override
+    public void changeStatus(Long movieId, MovieStatus status) {
+        Movie movie = movieRepository.findActiveByIdForUpdate(movieId)
+                .orElseThrow(MovieViewAssembler::movieNotFound);
+        assertScheduledShowtimesStayConsistent(movie, movie.getDurationMinutes(), status);
+        movie.setStatus(status);
+        publicMovieCache.evictAfterCommit();
+        movieRepository.save(movie);
     }
 
     @Transactional
@@ -139,10 +150,11 @@ public class MovieAdminService implements IMovieAdminService {
         return movieViewAssembler.getMovieDetail(movieId);
     }
 
-    private void assertScheduledShowtimesStayConsistent(Movie movie, MovieRequest movieRequest) {
-        boolean durationChanged = movie.getDurationMinutes() != movieRequest.durationMinutes();
-        boolean becomingEnded = movieRequest.status() == MovieStatus.ENDED && movie.getStatus() != MovieStatus.ENDED;
-        if (!durationChanged && !becomingEnded) {
+    private void assertScheduledShowtimesStayConsistent(Movie movie, int durationMinutes, MovieStatus status) {
+        boolean durationChanged = movie.getDurationMinutes() != durationMinutes;
+        boolean becomingEnded = status == MovieStatus.ENDED && movie.getStatus() != MovieStatus.ENDED;
+        boolean becomingDraft = status == MovieStatus.DRAFT && movie.getStatus() != MovieStatus.DRAFT;
+        if (!durationChanged && !becomingEnded && !becomingDraft) {
             return;
         }
         if (movieUsageChecker.countUpcomingShowtimesByMovie(movie.getId(), Instant.now(clock)) == 0) {
@@ -153,6 +165,12 @@ public class MovieAdminService implements IMovieAdminService {
                     "Phim còn suất chiếu chưa diễn ra, hãy hủy các suất chiếu trước khi đổi thời lượng",
                     HttpStatus.CONFLICT,
                     "MOVIE_DURATION_LOCKED");
+        }
+        if (becomingDraft) {
+            throw new AppException(
+                    "Phim còn suất chiếu chưa diễn ra, hãy hủy các suất chiếu trước khi chuyển về bản nháp",
+                    HttpStatus.CONFLICT,
+                    "MOVIE_HAS_UPCOMING_SHOWTIMES");
         }
         throw new AppException(
                 "Phim còn suất chiếu chưa diễn ra, hãy hủy các suất chiếu trước khi chuyển sang ngừng chiếu",
